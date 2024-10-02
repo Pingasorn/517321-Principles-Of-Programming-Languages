@@ -1,0 +1,91 @@
+#lang racket/base
+(require racket/math)  ;; นำเข้าไลบรารีที่มีค่า pi
+
+;ข้อ 1:สร้างฟังก์ชันในการคํานวณหาปริมาตรทรงกลม เมื่อระบุรัศมี
+(define (shape r)
+  (* (/ 4 3) pi (expt r 3)))
+
+(shape 5);;
+
+;ข้อ 2:สร้างฟังก์ชันในการคํานวณหาพื้นที่สามเหลี่ยม เมื่อระบุความกว้างและความสูง
+(define (triangle w h)
+   (* 0.5 w h))
+   
+(triangle 20 4);;
+
+;ข้อ 3:สร้างฟังก์ชันตัดเกรดโดยคะแนนน้อยกว่า 40 ได้ F ระหว่าง 40-79 ได้ P และ 80 ขึ้นไปได้ G
+(define (grade G)
+   (cond
+   [(< G 40) "F"]
+   [(<= G 79) "P"]
+   [else "G"]))
+  
+(grade 50);;
+
+;ข้อ 4:สร้างฟังก์ชันหาเลขหลักสิบ (ค้นหาฟังก์ชันหารเอาเศษ และหารปัดเศษทิ้งใน reference manual)
+(define (second n)
+  (modulo (quotient n 10) 10))
+   
+(second 1234);;
+
+;ข้อ 5สร้างฟังก์ชันคํานวณหาผลคูณของสมาชิกแต่ละตัวในเลขจํานวน เช่น 1234 จะได้ 1*2*3*4 = 24
+(require racket/list)  ;; ใช้ไลบรารีสำหรับจัดการลิสต์
+
+(define (each n)
+  (define digits (map (lambda (c) (- (char->integer c) (char->integer #\0))) 
+                      (string->list (number->string n))))
+  (apply * digits))
+  
+(each 1234)
+
+;ข้อ 6 :เรียกใช้ฟังก์ชันกลับลําดับสมาชิกในลิสต์ที่ให้เช่น (..... (list 1 2 3 4))
+(define (reverse-list lst)
+  (define (helper lst acc)
+    (if (null? lst)
+        acc
+        (helper (cdr lst) (cons (car lst) acc))))
+  (helper lst '()))  ;; เรียกใช้ฟังก์ชันช่วย
+
+;; ทดสอบฟังก์ชัน
+(reverse-list (list 1 2 3 4))  ;; จะได้ '(4 3 2 1)
+
+;ข้อ  7 :เรียกใช้ฟังก์ชันสลับลําดับของลิสต์ที่ให้ เช่น (...... '(1 2 3))
+(define (permutations lst)
+  (if (null? lst)              ;; ถ้าลิสต์ว่าง ให้คืนลิสต์ว่าง
+      '(())
+      (apply append            ;; ใช้ apply และ append เพื่อรวมผลลัพธ์
+             (map (lambda (x)
+                    (map (lambda (p) (cons x p))
+                         (permutations (remove x lst))))
+                  lst))))
+
+(define (remove item lst)
+  (cond
+    [(null? lst) '()]            ;; ถ้าลิสต์ว่างคืนลิสต์ว่าง
+    [(equal? item (car lst))     ;; ถ้าหมายเลขตรงกับตัวแรก
+     (remove item (cdr lst))]    ;; ลบตัวแรกและเรียกใช้ฟังก์ชันอีกครั้ง
+    [else
+     (cons (car lst) (remove item (cdr lst)))])) ;; ถ้าไม่ตรง ก็เก็บตัวแรกไว้แล้วเรียกใช้อีกครั้ง
+
+;; ทดสอบฟังก์ชัน
+(permutations '(1 2 3)) ;; ผลลัพธ์จะเป็น '((1 2 3) (1 3 2) (2 1 3) (2 3 1) (3 1 2) (3 2 1))
+
+;ข้อ 8 : สร้างฟังก์ชันในการคืนค่าสมาชิกตัวสุดท้ายของลิสต์ที่ให้เช่น (last '(a b c d))
+(define (last lst)
+  (cond
+    [(null? lst) (error "ลิสต์ว่าง ไม่มีสมาชิกสุดท้าย")]
+    [(null? (cdr lst)) (car lst)]
+    [else (last (cdr lst))]))
+
+;; ทดสอบฟังก์ชัน
+(last '(a b c d)) ;; จะได้ 'd
+
+;ข้อ 9:สร้างฟังก์ชันในการลบสมาชิกตัวสุดท้ายของลิสต์ที่ให้เช่น (removelast '(a b c d)) 
+(define (removelast lst)
+  (cond
+    [(null? lst) '()]  ;; ถ้าลิสต์ว่าง คืนลิสต์ว่าง
+    [(null? (cdr lst)) '()]  ;; ถ้ามีสมาชิกเพียงตัวเดียว คืนลิสต์ว่าง
+    [else (cons (car lst) (removelast (cdr lst)))]))  ;; คืนสมาชิกที่เหลือ
+
+;; ทดสอบฟังก์ชัน
+(removelast '(a b c d)) ;; จะได้ '(a b c)
